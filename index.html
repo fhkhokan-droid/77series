@@ -28,6 +28,7 @@
       box-shadow: 0 0 6px rgba(0,0,0,0.2);
       margin-bottom: 15px;
       text-align: center;
+      display: none;
     }
 
     .page img {
@@ -39,6 +40,8 @@
     .controls {
       text-align: center;
       margin: 15px;
+      position: relative;
+      z-index: 9999;
     }
 
     @media (max-width: 600px) {
@@ -76,26 +79,42 @@
       flipbook.innerHTML = '';
 
       // Static pages
-      addPage("pages/cover.jpg", "Cover");
-      addPage("pages/intro.jpg", "Introduction");
+      addPage("pages/cover.jpg", "Cover", "cover");
+      addPage("pages/intro.jpg", "Introduction", "intro");
 
       // Profile pages
       data.forEach(entry => {
         addPage(`pages/page${entry.page}.jpg`,
-          `Page ${entry.page} - Roll: ${entry.roll}, Nickname: ${entry.nickname}`);
+          `Page ${entry.page} - Roll: ${entry.roll}, Nickname: ${entry.nickname}`,
+          entry.page);
       });
 
       // Extras
-      addPage("pages/extra1.jpg", "Departed Souls");
-      addPage("pages/extra2.jpg", "Campus");
+      addPage("pages/extra1.jpg", "Departed Souls", "extra1");
+      addPage("pages/extra2.jpg", "Campus", "extra2");
 
       showPage(0);
     }
 
-    function addPage(imgPath, title) {
+    function addPage(imgPath, title, pageId) {
       const page = document.createElement('div');
       page.className = 'page';
+      page.dataset.page = pageId;
       page.innerHTML = `<img src="${imgPath}" alt="${title}">`;
+
+      // Bottom-corner click detection
+      page.addEventListener('click', e => {
+        const rect = page.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const cornerHeight = rect.height * 0.3;
+        const cornerWidth = rect.width * 0.3;
+        if (y > rect.height - cornerHeight) {
+          if (x > rect.width - cornerWidth) nextPage();
+          else if (x < cornerWidth) prevPage();
+        }
+      });
+
       document.getElementById('flipbook').appendChild(page);
     }
 
@@ -140,7 +159,7 @@
         return;
       }
 
-      const DOM_OFFSET = 2; // cover + intro
+      const pages = document.querySelectorAll('.page');
       matches.forEach(entry => {
         const item = document.createElement('div');
         item.className = 'result';
@@ -148,9 +167,12 @@
                           <strong>Nickname:</strong> ${entry.nickname} | 
                           <strong>Page:</strong> ${entry.page}`;
         item.onclick = () => {
-          const domIndex = DOM_OFFSET + (entry.page - 1);
-          showPage(domIndex);
-          document.getElementById('flipbook').scrollIntoView({ behavior: 'smooth' });
+          // Find the DOM index by matching dataset.page
+          const target = Array.from(pages).findIndex(p => p.dataset.page == entry.page);
+          if (target >= 0) {
+            showPage(target);
+            document.getElementById('flipbook').scrollIntoView({ behavior: 'smooth' });
+          }
         };
         resultsDiv.appendChild(item);
       });
