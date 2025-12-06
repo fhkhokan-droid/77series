@@ -13,49 +13,28 @@
     .result:hover { background: #eef; }
     .error { color: #b00020; font-weight: bold; }
 
-    .flipbook {
+    .viewer {
       width: 100%;
       max-width: 600px;
-      height: 400px;
       margin: 20px auto;
-      position: relative;
-      perspective: 2000px;
+      text-align: center;
     }
 
-    .page {
+    .viewer img {
       width: 100%;
-      height: 100%;
-      position: absolute;
-      top: 0; left: 0;
-      background: white;
+      height: auto;
       box-shadow: 0 0 6px rgba(0,0,0,0.2);
-      transform-origin: left center;
-      transition: transform 1s ease;
-      backface-visibility: hidden;
-      z-index: 1;
-    }
-
-    .page img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-
-    .page.flipped {
-      transform: rotateY(-180deg);
+      transition: opacity 0.5s ease;
     }
 
     .controls {
       text-align: center;
       margin: 15px;
-      position: relative;
-      z-index: 9999;
     }
 
     @media (max-width: 600px) {
       h1 { font-size: 18px; }
       #searchBox { width: 90%; }
-      .flipbook { height: 300px; }
     }
   </style>
 </head>
@@ -68,7 +47,9 @@
   </div>
   <div id="results"></div>
 
-  <div class="flipbook" id="flipbook"></div>
+  <div class="viewer">
+    <img id="pageImage" src="" alt="Page">
+  </div>
 
   <div class="controls">
     <button onclick="prevPage()">◀ Prev</button>
@@ -78,71 +59,43 @@
   <script>
     let data = [];
     let currentPage = 0;
+    let pages = [];
 
     fetch('index.json')
       .then(r => r.json())
-      .then(json => { data = json; renderBook(); showPage(0); });
+      .then(json => { data = json; buildPages(); showPage(0); });
 
-    function renderBook() {
-      const flipbook = document.getElementById('flipbook');
-      flipbook.innerHTML = '';
-
+    function buildPages() {
+      pages = [];
       // Static pages
-      addPage("pages/cover.jpg", "cover");
-      addPage("pages/intro.jpg", "intro");
-
+      pages.push({id:"cover", src:"pages/cover.jpg"});
+      pages.push({id:"intro", src:"pages/intro.jpg"});
       // Profile pages
       data.forEach(entry => {
-        addPage(`pages/page${entry.page}.jpg`, entry.page);
+        pages.push({id:String(entry.page), src:`pages/page${entry.page}.jpg`});
       });
-
       // Extras
-      addPage("pages/extra1.jpg", "extra1");
-      addPage("pages/extra2.jpg", "extra2");
-    }
-
-    function addPage(imgPath, pageId) {
-      const page = document.createElement('div');
-      page.className = 'page';
-      page.dataset.page = pageId;
-      page.innerHTML = `<img src="${imgPath}" alt="Page ${pageId}">`;
-
-      // Bottom-corner click detection
-      page.addEventListener('click', e => {
-        const rect = page.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const cornerHeight = rect.height * 0.3;
-        const cornerWidth = rect.width * 0.3;
-        if (y > rect.height - cornerHeight) {
-          if (x > rect.width - cornerWidth) nextPage();
-          else if (x < cornerWidth) prevPage();
-        }
-      });
-
-      document.getElementById('flipbook').appendChild(page);
+      pages.push({id:"extra1", src:"pages/extra1.jpg"});
+      pages.push({id:"extra2", src:"pages/extra2.jpg"});
     }
 
     function showPage(index) {
-      const pages = document.querySelectorAll('.page');
-      pages.forEach((p, i) => {
-        p.classList.toggle('flipped', i < index);
-        p.style.zIndex = pages.length - i;
-      });
+      if (index < 0 || index >= pages.length) return;
       currentPage = index;
+      const img = document.getElementById('pageImage');
+      img.style.opacity = 0;
+      setTimeout(() => {
+        img.src = pages[index].src;
+        img.style.opacity = 1;
+      }, 200);
     }
 
     function nextPage() {
-      const pages = document.querySelectorAll('.page');
-      if (currentPage < pages.length - 1) {
-        showPage(currentPage + 1);
-      }
+      if (currentPage < pages.length - 1) showPage(currentPage + 1);
     }
 
     function prevPage() {
-      if (currentPage > 0) {
-        showPage(currentPage - 1);
-      }
+      if (currentPage > 0) showPage(currentPage - 1);
     }
 
     function doSearch() {
@@ -165,7 +118,6 @@
         return;
       }
 
-      const pages = document.querySelectorAll('.page');
       matches.forEach(entry => {
         const item = document.createElement('div');
         item.className = 'result';
@@ -173,10 +125,10 @@
                           <strong>Nickname:</strong> ${entry.nickname} | 
                           <strong>Page:</strong> ${entry.page}`;
         item.onclick = () => {
-          const target = Array.from(pages).findIndex(p => p.dataset.page == entry.page);
+          const target = pages.findIndex(p => p.id == entry.page);
           if (target >= 0) {
             showPage(target);
-            document.getElementById('flipbook').scrollIntoView({ behavior: 'smooth' });
+            document.querySelector('.viewer').scrollIntoView({ behavior: 'smooth' });
           }
         };
         resultsDiv.appendChild(item);
