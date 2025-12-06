@@ -18,7 +18,7 @@
     iframe.fp-iframe {
       border: 1px solid lightgray;
       width: 100%;
-      height: 400px; /* adjust as needed */
+      height: 600px;
       display: block;
     }
 
@@ -32,12 +32,14 @@
 <body>
   <h1>77 Series Association Member's Directory</h1>
 
+  <!-- Search bar -->
   <div class="bar">
     <input id="searchBox" type="text" placeholder="Enter Roll or Nickname">
     <button onclick="doSearch()">Search</button>
   </div>
   <div id="results"></div>
 
+  <!-- Heyzine flipbook embed -->
   <div class="embed-wrap">
     <iframe allowfullscreen allow="clipboard-write" scrolling="no"
             class="fp-iframe"
@@ -45,20 +47,10 @@
   </div>
 
   <script>
-    // Load your index.json (expects fields like: roll, nickname, page)
     let data = [];
     fetch('index.json')
       .then(r => r.json())
       .then(json => { data = json; });
-
-    // Optional: If Heyzine page numbering differs, tune this mapping.
-    // For a constant offset, set OFFSET = (heyzinePage - internalPage).
-    const OFFSET = 0;
-    function toHeyzinePage(internalPage) {
-      // If you later add heyzinePage to entries, prefer that:
-      // return entry.heyzinePage ?? (Number(internalPage) + OFFSET);
-      return Number(internalPage) + OFFSET;
-    }
 
     function doSearch() {
       const query = document.getElementById('searchBox').value.trim().toLowerCase();
@@ -88,17 +80,7 @@
                           <strong>Nickname:</strong> ${entry.nickname} |
                           <strong>Page:</strong> ${entry.page}`;
         item.onclick = () => {
-          // Try common deep-link patterns. If Heyzine supports one, it will open that page.
-          const targetPage = toHeyzinePage(entry.page);
-          const base = 'https://heyzine.com/flip-book/26231c7492.html';
-          // Attempt hash param
-          iframe.src = `${base}#page=${targetPage}`;
-          // Fallback small delay: attempt query param if hash isn't supported
-          setTimeout(() => {
-            if (!iframe.src.includes(`#page=${targetPage}`)) {
-              iframe.src = `${base}?page=${targetPage}`;
-            }
-          }, 300);
+          iframe.src = "https://heyzine.com/flip-book/26231c7492.html#page/" + entry.page;
           document.querySelector('.embed-wrap').scrollIntoView({ behavior: 'smooth' });
         };
         resultsDiv.appendChild(item);
