@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <title>77 Series Association Member's Directory</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#ffffff">
   <style>
     body { font-family: Arial, sans-serif; margin: 0; background: #f5f5f5; }
     h1 { text-align: center; padding: 15px; font-size: 20px; }
@@ -18,23 +16,32 @@
     .flipbook {
       width: 100%;
       max-width: 600px;
+      height: 400px;
       margin: 20px auto;
       position: relative;
+      perspective: 2000px;
     }
 
     .page {
       width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0; left: 0;
       background: white;
       box-shadow: 0 0 6px rgba(0,0,0,0.2);
-      margin-bottom: 15px;
-      text-align: center;
-      display: none;
+      transform-origin: left center;
+      transition: transform 1s ease;
+      backface-visibility: hidden;
     }
 
     .page img {
       width: 100%;
-      height: auto;
-      display: block;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .page.flipped {
+      transform: rotateY(-180deg);
     }
 
     .controls {
@@ -47,6 +54,7 @@
     @media (max-width: 600px) {
       h1 { font-size: 18px; }
       #searchBox { width: 90%; }
+      .flipbook { height: 300px; }
     }
   </style>
 </head>
@@ -79,28 +87,24 @@
       flipbook.innerHTML = '';
 
       // Static pages
-      addPage("pages/cover.jpg", "Cover", "cover");
-      addPage("pages/intro.jpg", "Introduction", "intro");
+      addPage("pages/cover.jpg", "cover");
+      addPage("pages/intro.jpg", "intro");
 
       // Profile pages
       data.forEach(entry => {
-        addPage(`pages/page${entry.page}.jpg`,
-          `Page ${entry.page} - Roll: ${entry.roll}, Nickname: ${entry.nickname}`,
-          entry.page);
+        addPage(`pages/page${entry.page}.jpg`, entry.page);
       });
 
       // Extras
-      addPage("pages/extra1.jpg", "Departed Souls", "extra1");
-      addPage("pages/extra2.jpg", "Campus", "extra2");
-
-      showPage(0);
+      addPage("pages/extra1.jpg", "extra1");
+      addPage("pages/extra2.jpg", "extra2");
     }
 
-    function addPage(imgPath, title, pageId) {
+    function addPage(imgPath, pageId) {
       const page = document.createElement('div');
       page.className = 'page';
       page.dataset.page = pageId;
-      page.innerHTML = `<img src="${imgPath}" alt="${title}">`;
+      page.innerHTML = `<img src="${imgPath}" alt="Page ${pageId}">`;
 
       // Bottom-corner click detection
       page.addEventListener('click', e => {
@@ -121,7 +125,8 @@
     function showPage(index) {
       const pages = document.querySelectorAll('.page');
       pages.forEach((p, i) => {
-        p.style.display = (i === index) ? 'block' : 'none';
+        if (i < index) p.classList.add('flipped');
+        else p.classList.remove('flipped');
       });
       currentPage = index;
     }
@@ -167,7 +172,6 @@
                           <strong>Nickname:</strong> ${entry.nickname} | 
                           <strong>Page:</strong> ${entry.page}`;
         item.onclick = () => {
-          // Find the DOM index by matching dataset.page
           const target = Array.from(pages).findIndex(p => p.dataset.page == entry.page);
           if (target >= 0) {
             showPage(target);
