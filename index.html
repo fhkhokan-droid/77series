@@ -32,6 +32,7 @@
       transform-origin: left center;
       transition: transform 1s ease;
       backface-visibility: hidden;
+      z-index: 1;
     }
 
     .page img {
@@ -80,7 +81,7 @@
 
     fetch('index.json')
       .then(r => r.json())
-      .then(json => { data = json; renderBook(); });
+      .then(json => { data = json; renderBook(); showPage(0); });
 
     function renderBook() {
       const flipbook = document.getElementById('flipbook');
@@ -125,8 +126,8 @@
     function showPage(index) {
       const pages = document.querySelectorAll('.page');
       pages.forEach((p, i) => {
-        if (i < index) p.classList.add('flipped');
-        else p.classList.remove('flipped');
+        p.classList.toggle('flipped', i < index);
+        p.style.zIndex = pages.length - i;
       });
       currentPage = index;
     }
