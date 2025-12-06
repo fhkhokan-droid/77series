@@ -4,21 +4,16 @@
   <meta charset="UTF-8">
   <title>77 Series Association Member's Directory</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- PWA manifest -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ffffff">
-
-  <!-- QR Code library -->
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
-    #searchBox { width: 250px; padding: 8px; }
-    #results { margin-top: 20px; }
-    .result { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
-    .error { color: red; font-weight: bold; }
-
+    #searchBox { width: 260px; padding: 8px; }
+    #results { margin-top: 16px; }
+    .result { border: 1px solid #ccc; padding: 8px; margin-bottom: 10px; cursor: pointer; background: #fff; }
+    .result:hover { background: #f0f7ff; }
+    .error { color: #b00020; font-weight: bold; }
     .book {
       width: 400px;
       height: 250px;
@@ -34,14 +29,12 @@
       top: 0;
       left: 0;
       transform-origin: left center;
-      transition: transform 1s ease;
+      transition: transform 0.8s ease;
       box-shadow: 0 0 8px rgba(0,0,0,0.3);
       padding: 20px;
     }
     .page.flipped { transform: rotateY(-180deg); }
     .controls { text-align: center; margin-top: 10px; }
-
-    /* QR badge styling */
     .qr-badge {
       border: 2px solid #333;
       border-radius: 12px;
@@ -54,8 +47,6 @@
     }
     .qr-badge h3 { margin-bottom: 15px; font-size: 18px; color: #222; }
     .qr-badge .caption { margin-top: 10px; font-size: 14px; color: #555; font-style: italic; }
-
-    /* Spinner */
     .spinner {
       border: 4px solid #f3f3f3;
       border-top: 4px solid #333;
@@ -66,12 +57,7 @@
       margin: 10px auto;
       display: none;
     }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    /* Overlay text */
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     .overlay {
       position: relative;
       width: 100%;
@@ -88,19 +74,16 @@
 <body>
   <h1>77 Series Association Member's Directory</h1>
 
-  <!-- Search (only for profile pages) -->
   <input id="searchBox" type="text" placeholder="Enter Roll or Nickname">
   <button onclick="doSearch()">Search</button>
   <div id="results"></div>
 
-  <!-- Flipbook -->
   <div class="book" id="book"></div>
   <div class="controls">
     <button onclick="prevPage()">◀ Prev</button>
     <button onclick="nextPage()">Next ▶</button>
   </div>
 
-  <!-- QR Badge -->
   <div class="qr-badge">
     <h3>📖 Scan to Open Directory</h3>
     <div id="qrcode"></div>
@@ -111,42 +94,43 @@
     let data = [];
     let currentPage = 0;
 
-    // Load JSON index (profile pages only)
+    // Load profile index
     fetch('index.json')
       .then(r => r.json())
-      .then(json => { data = json; renderBook(); });
+      .then(json => { data = json; renderBook(); initQR(); })
+      .catch(err => {
+        document.getElementById('results').innerHTML =
+          '<p class="error">Failed to load index.json</p>';
+        console.error(err);
+      });
 
     function renderBook() {
       const book = document.getElementById('book');
       book.innerHTML = '';
 
-      // --- Cover page (static, not searchable) ---
+      // Static pages first
       addStaticPage("Cover", "pages/cover.jpg");
-
-      // --- Introduction page (static, not searchable) ---
       addStaticPage("Introduction", "pages/intro.jpg");
 
-      // --- Profile pages (searchable, from index.json) ---
+      // Profile pages from index.json
       data.forEach((entry, i) => {
         const page = document.createElement('div');
         page.className = 'page';
-        page.style.zIndex = data.length - i;
-
+        page.style.zIndex = (data.length + 4) - i; // keep stack above extras
         page.innerHTML = `
           <h3>Page ${entry.page}</h3>
           <p><strong>Roll:</strong> ${entry.roll}</p>
           <p><strong>Nickname:</strong> ${entry.nickname}</p>
-          <div id="spinner-${entry.page}" class="spinner"></div>
-          <div id="overlay-${entry.page}" class="overlay">Loading…</div>
-          <img id="img-${entry.page}" 
-               data-src="pages/page${entry.page}.jpg" 
-               alt="Flipbook Page ${entry.page}" 
+          <div class="spinner"></div>
+          <div class="overlay">Loading…</div>
+          <img data-src="pages/page${entry.page}.jpg"
+               alt="Flipbook Page ${entry.page}"
                style="width:100%; margin-top:10px; display:none;">
         `;
         book.appendChild(page);
       });
 
-      // --- Extra photo pages (static, not searchable) ---
+      // Static extras
       addStaticPage("Departed Souls", "pages/extra1.jpg");
       addStaticPage("Campus", "pages/extra2.jpg");
 
@@ -204,6 +188,17 @@
       }
     }
 
+    function prefetchImage(pageIndex) {
+      const pages = document.querySelectorAll('.page');
+      const page = pages[pageIndex];
+      if (!page) return;
+      const img = page.querySelector('img');
+      if (img && img.dataset.src && img.style.display === 'none') {
+        const temp = new Image();
+        temp.src = img.dataset.src;
+      }
+    }
+
     function isFastConnection() {
       if (navigator.connection) {
         return navigator.connection.effectiveType === '4g';
@@ -216,10 +211,8 @@
       if (currentPage < pages.length) {
         pages[currentPage].classList.add('flipped');
         currentPage++;
-
         loadImage(currentPage);
 
-        // Smart prefetch
         if (isFastConnection()) {
           if (currentPage + 1 < pages.length) prefetchImage(currentPage + 1);
           if (currentPage + 2 < pages.length) prefetchImage(currentPage + 2);
@@ -227,7 +220,6 @@
           if (currentPage + 1 < pages.length) prefetchImage(currentPage + 1);
         }
 
-        // Unload far behind
         if (currentPage - 3 >= 0) unloadImage(currentPage - 3);
       }
     }
@@ -237,12 +229,97 @@
         currentPage--;
         const pages = document.querySelectorAll('.page');
         pages[currentPage].classList.remove('flipped');
-
         loadImage(currentPage);
 
-        // Smart prefetch backwards
         if (isFastConnection()) {
           if (currentPage - 1 >= 0) prefetchImage(currentPage - 1);
           if (currentPage - 2 >= 0) prefetchImage(currentPage - 2);
         } else {
           if (currentPage - 1 >= 0) prefetchImage(currentPage - 1);
+        }
+      }
+    }
+
+    // Jump to a specific DOM page index and manage flips/images
+    function gotoPage(targetIndex) {
+      const pages = document.querySelectorAll('.page');
+      if (targetIndex < 0 || targetIndex >= pages.length) return;
+
+      // Reset all flips if jumping backwards past currentPage
+      if (targetIndex < currentPage) {
+        for (let i = currentPage; i > targetIndex; i--) {
+          pages[i - 1].classList.remove('flipped');
+        }
+      } else if (targetIndex > currentPage) {
+        for (let i = currentPage; i < targetIndex; i++) {
+          pages[i].classList.add('flipped');
+        }
+      }
+
+      currentPage = targetIndex;
+      loadImage(currentPage);
+
+      // Prefetch adjacent pages
+      if (currentPage + 1 < pages.length) prefetchImage(currentPage + 1);
+      if (currentPage - 1 >= 0) prefetchImage(currentPage - 1);
+    }
+
+    // Search: filter by roll or nickname, show results, click to jump
+    function doSearch() {
+      const query = document.getElementById('searchBox').value.trim().toLowerCase();
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '';
+
+      if (!query) {
+        resultsDiv.innerHTML = '<p class="error">Please enter a roll or nickname.</p>';
+        return;
+      }
+
+      const matches = data.filter(entry =>
+        String(entry.roll).toLowerCase().includes(query) ||
+        String(entry.nickname).toLowerCase().includes(query)
+      );
+
+      if (matches.length === 0) {
+        resultsDiv.innerHTML = '<p class="error">No matches found.</p>';
+        return;
+      }
+
+      // DOM offset: 2 static pages (Cover, Introduction) before profile pages
+      const DOM_OFFSET = 2;
+
+      matches.forEach(entry => {
+        const item = document.createElement('div');
+        item.className = 'result';
+        item.innerHTML = `
+          <strong>Roll:</strong> ${entry.roll} &nbsp;|&nbsp;
+          <strong>Nickname:</strong> ${entry.nickname} &nbsp;|&nbsp;
+          <strong>Page:</strong> ${entry.page}
+        `;
+        item.onclick = () => {
+          const domIndex = DOM_OFFSET + (entry.page - 1); // page1 => index 2
+          gotoPage(domIndex);
+          // Scroll to flipbook for visibility
+          document.getElementById('book').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+        resultsDiv.appendChild(item);
+      });
+    }
+
+    // QR pointing to the current origin + path
+    function initQR() {
+      try {
+        const url = window.location.href;
+        const qrDiv = document.getElementById('qrcode');
+        QRCode.toCanvas(url, { width: 180 }, function (error, canvas) {
+          if (error) console.error(error);
+          qrDiv.innerHTML = '';
+          qrDiv.appendChild(canvas);
+        });
+      } catch (e) {
+        console.error('QR init error', e);
+      }
+    }
+  </script>
+</body>
+</html>
