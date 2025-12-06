@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>77 Series Association Member's Directory</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- PWA manifest -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ffffff">
+
+  <!-- QR Code library -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+    #searchBox { width: 250px; padding: 8px; }
+    #results { margin-top: 20px; }
+    .result { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+    .error { color: red; font-weight: bold; }
+
+    .book {
+      width: 400px;
+      height: 250px;
+      margin: 30px auto;
+      perspective: 1500px;
+      position: relative;
+    }
+    .page {
+      width: 100%;
+      height: 100%;
+      background: white;
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform-origin: left center;
+      transition: transform 1s ease;
+      box-shadow: 0 0 8px rgba(0,0,0,0.3);
+      padding: 20px;
+    }
+    .page.flipped { transform: rotateY(-180deg); }
+    .controls { text-align: center; margin-top: 10px; }
+
+    /* QR badge styling */
+    .qr-badge {
+      border: 2px solid #333;
+      border-radius: 12px;
+      padding: 20px;
+      width: 280px;
+      margin: 30px auto;
+      text-align: center;
+      background: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .qr-badge h3 { margin-bottom: 15px; font-size: 18px; color: #222; }
+    .qr-badge .caption { margin-top: 10px; font-size: 14px; color: #555; font-style: italic; }
+
+    /* Spinner */
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #333;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 10px auto;
+      display: none;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Overlay text */
+    .overlay {
+      position: relative;
+      width: 100%;
+      text-align: center;
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+      background: rgba(255,255,255,0.8);
+      padding: 5px 0;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>77 Series Association Member's Directory</h1>
+
+  <!-- Search (only for profile pages) -->
+  <input id="searchBox" type="text" placeholder="Enter Roll or Nickname">
+  <button onclick="doSearch()">Search</button>
+  <div id="results"></div>
+
+  <!-- Flipbook -->
+  <div class="book" id="book"></div>
+  <div class="controls">
+    <button onclick="prevPage()">◀ Prev</button>
+    <button onclick="nextPage()">Next ▶</button>
+  </div>
+
+  <!-- QR Badge -->
+  <div class="qr-badge">
+    <h3>📖 Scan to Open Directory</h3>
+    <div id="qrcode"></div>
+    <p class="caption">77 Series Association Member's Directory</p>
+  </div>
+
+  <script>
+    let data = [];
+    let currentPage = 0;
+
+    // Load JSON index (profile pages only)
+    fetch('index.json')
+      .then(r => r.json())
+      .then(json => { data = json; renderBook(); });
+
+    function renderBook() {
+      const book = document.getElementById('book');
+      book.innerHTML = '';
+
+      // --- Cover page (static, not searchable) ---
+      addStaticPage("Cover", "pages/cover.jpg");
+
+      // --- Introduction page (static, not searchable) ---
+      addStaticPage("Introduction", "pages/intro.jpg");
+
+      // --- Profile pages (searchable, from index.json) ---
+      data.forEach((entry, i) => {
+        const page = document.createElement('div');
+        page.className = 'page';
+        page.style.zIndex = data.length - i;
+
+        page.innerHTML = `
+          <h3>Page ${entry.page}</h3>
+          <p><strong>Roll:</strong> ${entry.roll}</p>
+          <p><strong>Nickname:</strong> ${entry.nickname}</p>
+          <div id="spinner-${entry.page}" class="spinner"></div>
+          <div id="overlay-${entry.page}" class="overlay">Loading…</div>
+          <img id="img-${entry.page}" 
+               data-src="pages/page${entry.page}.jpg" 
+               alt="Flipbook Page ${entry.page}" 
+               style="width:100%; margin-top:10px; display:none;">
+        `;
+        book.appendChild(page);
+      });
+
+      // --- Extra photo pages (static, not searchable) ---
+      addStaticPage("Departed Souls", "pages/extra1.jpg");
+      addStaticPage("Campus", "pages/extra2.jpg");
+
+      // Preload the first page (cover)
+      loadImage(0);
+    }
+
+    function addStaticPage(title, imgPath) {
+      const page = document.createElement('div');
+      page.className = 'page';
+      page.innerHTML = `
+        <h3>${title}</h3>
+        <div class="spinner"></div>
+        <div class="overlay">Loading…</div>
+        <img data-src="${imgPath}" alt="${title}" style="width:100%; margin-top:10px; display:none;">
+      `;
+      document.getElementById('book').appendChild(page);
+    }
+
+    function loadImage(pageIndex) {
+      const pages = document.querySelectorAll('.page');
+      const page = pages[pageIndex];
+      if (!page) return;
+      const img = page.querySelector('img');
+      const spinner = page.querySelector('.spinner');
+      const overlay = page.querySelector('.overlay');
+
+      if (img && img.dataset.src && img.style.display === 'none') {
+        spinner.style.display = 'block';
+        overlay.style.display = 'block';
+        img.src = img.dataset.src;
+
+        img.onload = () => {
+          spinner.style.display = 'none';
+          overlay.style.display = 'none';
+          img.style.display = 'block';
+        };
+
+        img.onerror = () => {
+          spinner.style.display = 'none';
+          overlay.innerText = "Image failed to load";
+          overlay.style.display = 'block';
+        };
+      }
+    }
+
+    function unloadImage(pageIndex) {
+      const pages = document.querySelectorAll('.page');
+      const page = pages[pageIndex];
+      if (!page) return;
+      const img = page.querySelector('img');
+      if (img && img.style.display === 'block') {
+        img.src = '';
+        img.style.display = 'none';
+      }
+    }
+
+    function isFastConnection() {
+      if (navigator.connection) {
+        return navigator.connection.effectiveType === '4g';
+      }
+      return true;
+    }
+
+    function nextPage() {
+      const pages = document.querySelectorAll('.page');
+      if (currentPage < pages.length) {
+        pages[currentPage].classList.add('flipped');
+        currentPage++;
+
+        loadImage(currentPage);
+
+        // Smart prefetch
+        if (isFastConnection()) {
+          if (currentPage + 1 < pages.length) prefetchImage(currentPage + 1);
+          if (currentPage + 2 < pages.length) prefetchImage(currentPage + 2);
+        } else {
+          if (currentPage + 1 < pages.length) prefetchImage(currentPage + 1);
+        }
+
+        // Unload far behind
+        if (currentPage - 3 >= 0) unloadImage(currentPage - 3);
+      }
+    }
+
+    function prevPage() {
+      if (currentPage > 0) {
+        currentPage--;
+        const pages = document.querySelectorAll('.page');
+        pages[currentPage].classList.remove('flipped');
+
+        loadImage(currentPage);
+
+        // Smart prefetch backwards
+        if (isFastConnection()) {
+          if (currentPage - 1 >= 0) prefetchImage(currentPage - 1);
+          if (currentPage - 2 >= 0) prefetchImage(currentPage - 2);
+        } else {
+          if (currentPage - 1 >= 0) prefetchImage(currentPage - 1);
