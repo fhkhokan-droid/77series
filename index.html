@@ -8,36 +8,51 @@
   <meta name="theme-color" content="#ffffff">
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
-    #searchBox { width: 260px; padding: 8px; }
-    #results { margin-top: 16px; }
-    .result { border: 1px solid #ccc; padding: 8px; margin-bottom: 10px; cursor: pointer; background: #fff; }
-    .result:hover { background: #f0f7ff; }
+    body { font-family: Arial, sans-serif; margin: 0; background: #f5f5f5; }
+    h1 { text-align: center; padding: 20px; }
+    #searchBox { width: 250px; padding: 8px; }
+    #results { margin: 10px auto; width: 90%; max-width: 600px; }
+    .result { border: 1px solid #ccc; padding: 8px; margin-bottom: 8px; cursor: pointer; background: #fff; }
+    .result:hover { background: #eef; }
     .error { color: #b00020; font-weight: bold; }
-    .book {
-      width: 400px;
-      height: 250px;
-      margin: 30px auto;
-      perspective: 1500px;
+
+    /* Flipbook container */
+    .flipbook {
+      width: 800px;
+      height: 500px;
+      margin: 20px auto;
       position: relative;
-margin-bottom: 40px;
-
-
+      perspective: 2000px;
+      background: #ddd;
+      overflow: hidden;
     }
+
     .page {
       width: 100%;
       height: 100%;
-      background: white;
       position: absolute;
-      top: 0;
-      left: 0;
-      transform-origin: left center;
-      transition: transform 0.8s ease;
+      top: 0; left: 0;
+      background: white;
       box-shadow: 0 0 8px rgba(0,0,0,0.3);
-      padding: 20px;
+      transform-origin: right center;
+      transition: transform 1s ease;
+      backface-visibility: hidden;
     }
-    .page.flipped { transform: rotateY(-180deg); }
-    .controls { text-align: center; margin-top: 10px; }
+
+    .page img { width: 100%; height: 100%; object-fit: contain; }
+
+    .page.flipped {
+      transform: rotateY(-180deg);
+      z-index: 0;
+    }
+
+    .controls {
+      text-align: center;
+      margin: 20px;
+      position: relative;
+      z-index: 9999;
+    }
+
     .qr-badge {
       border: 2px solid #333;
       border-radius: 12px;
@@ -50,44 +65,19 @@ margin-bottom: 40px;
     }
     .qr-badge h3 { margin-bottom: 15px; font-size: 18px; color: #222; }
     .qr-badge .caption { margin-top: 10px; font-size: 14px; color: #555; font-style: italic; }
-    .spinner {
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #333;
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
-      animation: spin 1s linear infinite;
-      margin: 10px auto;
-      display: none;
-    }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .overlay {
-      position: relative;
-      width: 100%;
-      text-align: center;
-      font-size: 16px;
-      font-weight: bold;
-      color: #333;
-      background: rgba(255,255,255,0.8);
-      padding: 5px 0;
-      display: none;
-    }
-.controls {
-  text-align: center;
-  margin-top: 10px;
-  position: relative;
-  z-index: 9999;
-}
   </style>
 </head>
 <body>
   <h1>77 Series Association Member's Directory</h1>
 
-  <input id="searchBox" type="text" placeholder="Enter Roll or Nickname">
-  <button onclick="doSearch()">Search</button>
+  <div style="text-align:center;">
+    <input id="searchBox" type="text" placeholder="Enter Roll or Nickname">
+    <button onclick="doSearch()">Search</button>
+  </div>
   <div id="results"></div>
 
-  <div class="book" id="book"></div>
+  <div class="flipbook" id="flipbook"></div>
+
   <div class="controls">
     <button onclick="prevPage()">◀ Prev</button>
     <button onclick="nextPage()">Next ▶</button>
@@ -103,177 +93,67 @@ margin-bottom: 40px;
     let data = [];
     let currentPage = 0;
 
-    // Load profile index
     fetch('index.json')
       .then(r => r.json())
-      .then(json => { data = json; renderBook(); initQR(); })
-      .catch(err => {
-        document.getElementById('results').innerHTML =
-          '<p class="error">Failed to load index.json</p>';
-        console.error(err);
-      });
+      .then(json => { data = json; renderBook(); initQR(); });
 
     function renderBook() {
-      const book = document.getElementById('book');
-      book.innerHTML = '';
+      const flipbook = document.getElementById('flipbook');
+      flipbook.innerHTML = '';
 
-      // Static pages first
-      addStaticPage("Cover", "pages/cover.jpg");
-      addStaticPage("Introduction", "pages/intro.jpg");
+      // Static pages
+      addPage("pages/cover.jpg", "Cover");
+      addPage("pages/intro.jpg", "Introduction");
 
-      // Profile pages from index.json
-      data.forEach((entry, i) => {
-        const page = document.createElement('div');
-        page.className = 'page';
-        page.style.zIndex = (data.length + 4) - i; // keep stack above extras
-        page.innerHTML = `
-          <h3>Page ${entry.page}</h3>
-          <p><strong>Roll:</strong> ${entry.roll}</p>
-          <p><strong>Nickname:</strong> ${entry.nickname}</p>
-          <div class="spinner"></div>
-          <div class="overlay">Loading…</div>
-          <img data-src="pages/page${entry.page}.jpg"
-               alt="Flipbook Page ${entry.page}"
-               style="width:100%; margin-top:10px; display:none;">
-        `;
-        book.appendChild(page);
+      // Profile pages
+      data.forEach(entry => {
+        addPage(`pages/page${entry.page}.jpg`,
+          `Page ${entry.page} - Roll: ${entry.roll}, Nickname: ${entry.nickname}`);
       });
 
-      // Static extras
-      addStaticPage("Departed Souls", "pages/extra1.jpg");
-      addStaticPage("Campus", "pages/extra2.jpg");
+      // Extras
+      addPage("pages/extra1.jpg", "Departed Souls");
+      addPage("pages/extra2.jpg", "Campus");
 
-      // Preload the first page (cover)
-      loadImage(0);
+      showPage(0);
     }
 
-    function addStaticPage(title, imgPath) {
+    function addPage(imgPath, title) {
       const page = document.createElement('div');
       page.className = 'page';
-      page.innerHTML = `
-        <h3>${title}</h3>
-        <div class="spinner"></div>
-        <div class="overlay">Loading…</div>
-        <img data-src="${imgPath}" alt="${title}" style="width:100%; margin-top:10px; display:none;">
-      `;
-      document.getElementById('book').appendChild(page);
+      page.innerHTML = `<img src="${imgPath}" alt="${title}">`;
+      page.addEventListener('click', e => {
+        const rect = page.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        if (x > rect.width * 0.7) nextPage();
+        else if (x < rect.width * 0.3) prevPage();
+      });
+      document.getElementById('flipbook').appendChild(page);
     }
 
-    function loadImage(pageIndex) {
+    function showPage(index) {
       const pages = document.querySelectorAll('.page');
-      const page = pages[pageIndex];
-      if (!page) return;
-      const img = page.querySelector('img');
-      const spinner = page.querySelector('.spinner');
-      const overlay = page.querySelector('.overlay');
-
-      if (img && img.dataset.src && img.style.display === 'none') {
-        spinner.style.display = 'block';
-        overlay.style.display = 'block';
-        img.src = img.dataset.src;
-
-        img.onload = () => {
-          spinner.style.display = 'none';
-          overlay.style.display = 'none';
-          img.style.display = 'block';
-        };
-
-        img.onerror = () => {
-          spinner.style.display = 'none';
-          overlay.innerText = "Image failed to load";
-          overlay.style.display = 'block';
-        };
-      }
-    }
-
-    function unloadImage(pageIndex) {
-      const pages = document.querySelectorAll('.page');
-      const page = pages[pageIndex];
-      if (!page) return;
-      const img = page.querySelector('img');
-      if (img && img.style.display === 'block') {
-        img.src = '';
-        img.style.display = 'none';
-      }
-    }
-
-    function prefetchImage(pageIndex) {
-      const pages = document.querySelectorAll('.page');
-      const page = pages[pageIndex];
-      if (!page) return;
-      const img = page.querySelector('img');
-      if (img && img.dataset.src && img.style.display === 'none') {
-        const temp = new Image();
-        temp.src = img.dataset.src;
-      }
-    }
-
-    function isFastConnection() {
-      if (navigator.connection) {
-        return navigator.connection.effectiveType === '4g';
-      }
-      return true;
+      pages.forEach((p, i) => {
+        p.style.zIndex = pages.length - i;
+        if (i < index) p.classList.add('flipped');
+        else p.classList.remove('flipped');
+      });
+      currentPage = index;
     }
 
     function nextPage() {
       const pages = document.querySelectorAll('.page');
-      if (currentPage < pages.length) {
-        pages[currentPage].classList.add('flipped');
-        currentPage++;
-        loadImage(currentPage);
-
-        if (isFastConnection()) {
-          if (currentPage + 1 < pages.length) prefetchImage(currentPage + 1);
-          if (currentPage + 2 < pages.length) prefetchImage(currentPage + 2);
-        } else {
-          if (currentPage + 1 < pages.length) prefetchImage(currentPage + 1);
-        }
-
-        if (currentPage - 3 >= 0) unloadImage(currentPage - 3);
+      if (currentPage < pages.length - 1) {
+        showPage(currentPage + 1);
       }
     }
 
     function prevPage() {
       if (currentPage > 0) {
-        currentPage--;
-        const pages = document.querySelectorAll('.page');
-        pages[currentPage].classList.remove('flipped');
-        loadImage(currentPage);
-
-        if (isFastConnection()) {
-          if (currentPage - 1 >= 0) prefetchImage(currentPage - 1);
-          if (currentPage - 2 >= 0) prefetchImage(currentPage - 2);
-        } else {
-          if (currentPage - 1 >= 0) prefetchImage(currentPage - 1);
-        }
+        showPage(currentPage - 1);
       }
     }
 
-    // Jump to a specific DOM page index and manage flips/images
-    function gotoPage(targetIndex) {
-      const pages = document.querySelectorAll('.page');
-      if (targetIndex < 0 || targetIndex >= pages.length) return;
-
-      // Reset all flips if jumping backwards past currentPage
-      if (targetIndex < currentPage) {
-        for (let i = currentPage; i > targetIndex; i--) {
-          pages[i - 1].classList.remove('flipped');
-        }
-      } else if (targetIndex > currentPage) {
-        for (let i = currentPage; i < targetIndex; i++) {
-          pages[i].classList.add('flipped');
-        }
-      }
-
-      currentPage = targetIndex;
-      loadImage(currentPage);
-
-      // Prefetch adjacent pages
-      if (currentPage + 1 < pages.length) prefetchImage(currentPage + 1);
-      if (currentPage - 1 >= 0) prefetchImage(currentPage - 1);
-    }
-
-    // Search: filter by roll or nickname, show results, click to jump
     function doSearch() {
       const query = document.getElementById('searchBox').value.trim().toLowerCase();
       const resultsDiv = document.getElementById('results');
@@ -294,40 +174,30 @@ margin-bottom: 40px;
         return;
       }
 
-      // DOM offset: 2 static pages (Cover, Introduction) before profile pages
-      const DOM_OFFSET = 2;
-
+      const DOM_OFFSET = 2; // cover + intro
       matches.forEach(entry => {
         const item = document.createElement('div');
         item.className = 'result';
-        item.innerHTML = `
-          <strong>Roll:</strong> ${entry.roll} &nbsp;|&nbsp;
-          <strong>Nickname:</strong> ${entry.nickname} &nbsp;|&nbsp;
-          <strong>Page:</strong> ${entry.page}
-        `;
+        item.innerHTML = `<strong>Roll:</strong> ${entry.roll} | 
+                          <strong>Nickname:</strong> ${entry.nickname} | 
+                          <strong>Page:</strong> ${entry.page}`;
         item.onclick = () => {
-          const domIndex = DOM_OFFSET + (entry.page - 1); // page1 => index 2
-          gotoPage(domIndex);
-          // Scroll to flipbook for visibility
-          document.getElementById('book').scrollIntoView({ behavior: 'smooth', block: 'start' });
+          const domIndex = DOM_OFFSET + (entry.page - 1);
+          showPage(domIndex);
+          document.getElementById('flipbook').scrollIntoView({ behavior: 'smooth' });
         };
         resultsDiv.appendChild(item);
       });
     }
 
-    // QR pointing to the current origin + path
     function initQR() {
-      try {
-        const url = window.location.href;
+      const url = window.location.href;
+      QRCode.toCanvas(url, { width: 180 }, function (error, canvas) {
+        if (error) console.error(error);
         const qrDiv = document.getElementById('qrcode');
-        QRCode.toCanvas(url, { width: 180 }, function (error, canvas) {
-          if (error) console.error(error);
-          qrDiv.innerHTML = '';
-          qrDiv.appendChild(canvas);
-        });
-      } catch (e) {
-        console.error('QR init error', e);
-      }
+        qrDiv.innerHTML = '';
+        qrDiv.appendChild(canvas);
+      });
     }
   </script>
 </body>
