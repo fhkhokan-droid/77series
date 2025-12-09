@@ -4,46 +4,68 @@
   <meta charset="UTF-8">
   <title>77 Series Association Member's Directory</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Favicon -->
+
+  <!-- Favicons -->
   <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+  <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="images/favicon-192x192.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="images/favicon-192x192.png">
+
   <style>
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: url('images/marble-bg.jpg') no-repeat center center fixed;
-      background-size: cover;
-      color: #fff;
     }
 
-    .overlay {
-      background: rgba(0, 64, 128, 0.85); /* semi-transparent blue overlay */
-      min-height: 100vh;
-      padding-bottom: 20px;
+    /* Dark Theme */
+    body.dark-theme {
+      background: #0d0d0d;
+      color: #fff;
     }
+    body.dark-theme .logo {
+      filter: drop-shadow(0 0 6px rgba(0, 128, 255, 0.6));
+    }
+    body.dark-theme .header h1 { color: #ffe680; }
+    body.dark-theme .header span { color: #bfa14b; }
+    body.dark-theme footer { background: rgba(0,0,0,0.8); color: #fff; }
+
+    /* Light Theme */
+    body.light-theme {
+      background: #ffffff;
+      color: #222;
+    }
+    body.light-theme .logo {
+      filter: none;
+    }
+    body.light-theme .header h1 { color: #004080; }
+    body.light-theme .header span { color: #bfa14b; }
+    body.light-theme footer { background: #f0f0f0; color: #004080; }
 
     .header {
       text-align: center;
-      padding: 20px 10px 10px;
+      padding: 30px 10px 10px;
     }
 
-    .header img {
-      max-height: 100px;
+    .logo {
+      max-width: 240px;
+      width: 80%;
+      height: auto;
       display: block;
-      margin: 0 auto 10px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      margin: 0 auto 12px;
+      border-radius: 12px;
     }
 
     .header h1 {
-      font-size: 22px;
+      font-size: 24px;
       margin: 0;
-      color: #ffe680;
+      letter-spacing: 1px;
     }
 
     .header span {
       font-size: 16px;
-      color: #fff;
       font-weight: 500;
+      display: block;
+      margin-top: 4px;
     }
 
     .bar {
@@ -55,8 +77,8 @@
       padding: 10px;
       border: 1px solid #bfa14b;
       border-radius: 4px;
-      width: 70%;
-      max-width: 360px;
+      width: 60%;
+      max-width: 320px;
       background: #fff;
       color: #004080;
     }
@@ -86,7 +108,7 @@
       padding: 8px;
       margin-bottom: 8px;
       cursor: pointer;
-      background: #fff;
+      background: #f9f9f9;
       color: #004080;
       border-radius: 4px;
     }
@@ -96,12 +118,11 @@
     }
 
     .error {
-      color: #ffdddd;
+      color: #cc0000;
       font-weight: bold;
       text-align: center;
     }
 
-    /* Golden divider */
     .gold-divider {
       border: 0;
       height: 2px;
@@ -129,8 +150,6 @@
     footer {
       text-align: center;
       padding: 12px;
-      background: rgba(0,0,0,0.6);
-      color: #fff;
       font-size: 14px;
       margin-top: 30px;
     }
@@ -143,32 +162,37 @@
   </style>
 </head>
 <body>
-  <div class="overlay">
-    <div class="header">
-
-      <h1>MEMBERS' DIRECTORY - 2025<br><span>77 SERIES ASSOCIATION, ECR</span></h1>
-    </div>
-
-    <div class="bar">
-      <input id="searchBox" type="text" placeholder="Enter Roll or Nickname">
-      <button onclick="doSearch()">Search</button>
-    </div>
-    <div id="results"></div>
-
-    <hr class="gold-divider">
-
-    <div class="embed-wrap">
-      <iframe src="https://heyzine.com/flip-book/26231c7492.html"
-              class="fp-iframe" allowfullscreen></iframe>
-    </div>
-
-    <footer>
-      <p>© 2025 77 Series Association – Engineering College, Rajshahi<br>
-      <em>Bound by Friendship</em></p>
-    </footer>
+  <div class="header">
+    <img src="images/logo.png" alt="77 Series Association Logo" class="logo">
+    <h1>77 SERIES ASSOCIATION, ECR</h1>
+    <span>MEMBERS' DIRECTORY-2025</span>
   </div>
 
+  <div class="bar">
+    <input id="searchBox" type="text" placeholder="Enter Roll or Nickname">
+    <button onclick="doSearch()">Search</button>
+    <button onclick="refreshFlipbook()" title="Reload Flipbook">Refresh</button>
+    <button onclick="toggleTheme()" title="Switch Theme">Switch Theme</button>
+  </div>
+  <div id="results"></div>
+
+  <hr class="gold-divider">
+
+  <div class="embed-wrap">
+    <iframe src="" class="fp-iframe" allowfullscreen></iframe>
+  </div>
+
+  <footer>
+    <p>© 2025 77 Series Association<br>
+    <em>Engineering College, Rajshahi</em></p>
+  </footer>
+
   <script>
+    const FLIPBOOK_ID = "593070edb3"; // update this when Heyzine gives a new link
+    const BASE_URL = `https://heyzine.com/flip-book/${FLIPBOOK_ID}.html`;
+
+    document.querySelector("iframe.fp-iframe").src = `${BASE_URL}#page/1`;
+
     let data = [];
     fetch('index.json')
       .then(r => r.json())
@@ -202,13 +226,38 @@
                           <strong>Nickname:</strong> ${entry.nickname} |
                           <strong>Page:</strong> ${entry.page}`;
         item.onclick = () => {
-          iframe.src = "https://heyzine.com/flip-book/593070edb3.html#page/" + entry.page;
+          iframe.src = `${BASE_URL}#page/${entry.page}`;
           document.querySelector('.embed-wrap').scrollIntoView({ behavior: 'smooth' });
         };
         resultsDiv.appendChild(item);
       });
     }
+
+    function refreshFlipbook() {
+      const iframe = document.querySelector("iframe.fp-iframe");
+      iframe.src = `${BASE_URL}#page/1`;
+      document.querySelector('.embed-wrap').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Theme toggle with memory
+    function toggleTheme() {
+      const body = document.body;
+      if (body.classList.contains('dark-theme')) {
+        body.classList.remove('dark-theme');
+        body.classList.add('light-theme');
+        localStorage.setItem('theme', 'light');
+      } else {
+        body.classList.remove('light-theme');
+        body.classList.add('dark-theme');
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+
+    // Apply saved theme on load
+    window.onload = () => {
+      const savedTheme = localStorage.getItem('theme') || 'dark';
+      document.body.classList.add(savedTheme + '-theme');
+    };
   </script>
 </body>
-
 </html>
