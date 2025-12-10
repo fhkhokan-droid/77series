@@ -15,7 +15,7 @@
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: #2943B4;
+      background: #2943B4; /* single blue theme */
       color: #fff;
     }
 
@@ -144,7 +144,7 @@
       width: 100%;
       height: 600px;
       display: block;
-      background: #000;
+      background: #000; /* black background inside iframe */
     }
 
     footer {
@@ -194,10 +194,11 @@
   </footer>
 
   <script>
-    const FLIPBOOK_ID = "593070ebd3";
-    const BASE_URL = `https://heyzine.com/flip-book/${FLIPBOOK_ID}.html`;
+    // Use the exact working embed URL from Heyzine
+    const FULL_EMBED_URL = "https://heyzine.com/flip-book/593070edb3.html";
 
-    document.querySelector("iframe.fp-iframe").src = `${BASE_URL}#page/1`;
+    const iframe = document.querySelector("iframe.fp-iframe");
+    iframe.src = `${FULL_EMBED_URL}#page/1`;
 
     let data = [];
     fetch('index.json')
@@ -224,7 +225,6 @@
         return;
       }
 
-      const iframe = document.querySelector('iframe.fp-iframe');
       matches.forEach(entry => {
         const item = document.createElement('div');
         item.className = 'result';
@@ -232,7 +232,7 @@
                           <strong>Nickname:</strong> ${entry.nickname} |
                           <strong>Page:</strong> ${entry.page}`;
         item.onclick = () => {
-          iframe.src = `${BASE_URL}#page/${entry.page}`;
+          iframe.src = `${FULL_EMBED_URL}#page/${entry.page}`;
           document.querySelector('.embed-wrap').scrollIntoView({ behavior: 'smooth' });
         };
         resultsDiv.appendChild(item);
@@ -240,8 +240,7 @@
     }
 
     function refreshFlipbook() {
-      const iframe = document.querySelector("iframe.fp-iframe");
-      iframe.src = `${BASE_URL}#page/1`;
+      iframe.src = `${FULL_EMBED_URL}#page/1`;
       document.querySelector('.embed-wrap').scrollIntoView({ behavior: 'smooth' });
       document.getElementById('results').innerHTML = '';
     }
