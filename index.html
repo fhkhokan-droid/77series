@@ -15,63 +15,40 @@
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-    }
-
-    body.dark-theme {
-      background: #121212;
+      background: #2943B4;
       color: #fff;
     }
 
-    body.light-theme {
-      background: #ffffff;
-      color: #222;
-    }
-
-    body.dark-theme .logo {
-      filter: drop-shadow(0 0 6px rgba(0, 128, 255, 0.6));
-    }
-
-    body.light-theme .logo {
-      filter: none;
-    }
-
-    body.dark-theme .header h1 { color: #ffe680; }
-    body.light-theme .header h1 { color: #004080; }
-
-    body.dark-theme .header span { color: #bfa14b; }
-    body.light-theme .header span { color: #bfa14b; }
-
-    body.dark-theme footer { background: rgba(0,0,0,0.8); color: #fff; }
-    body.light-theme footer { background: #f0f0f0; color: #004080; }
-
     .header {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
+      text-align: center;
       padding: 20px 10px 10px;
-      flex-wrap: wrap;
     }
 
     .logo {
       max-width: 120px;
       height: auto;
       border-radius: 12px;
+      margin-bottom: 10px;
     }
 
     .header h1 {
       font-size: 22px;
-      margin: 0;
+      margin: 4px 0;
+      color: #ffe680;
       letter-spacing: 1px;
     }
 
-    .header span {
-      font-size: 14px;
+    .header h2 {
+      font-size: 18px;
+      margin: 4px 0;
+      color: #fff;
+    }
+
+    .header h3 {
+      font-size: 16px;
+      margin: 4px 0;
       font-weight: 500;
-      display: block;
-      margin-top: 4px;
-      text-align: center;
-      width: 100%;
+      color: #fff;
     }
 
     .bar {
@@ -79,28 +56,44 @@
       margin: 20px 0;
     }
 
+    .search-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
     #searchBox {
       padding: 10px;
-      border: 1px solid #bfa14b;
+      border: 1px solid #ffe680;
       border-radius: 4px;
       width: 60%;
       max-width: 320px;
       background: #fff;
-      color: #004080;
+      color: #2943B4;
     }
 
     button {
-      background: #bfa14b;
-      color: #fff;
+      background: #ffe680;
+      color: #2943B4;
       border: none;
       padding: 10px 16px;
-      margin-left: 8px;
       cursor: pointer;
       border-radius: 4px;
+      font-weight: bold;
     }
 
     button:hover {
-      background: #d4b060;
+      background: #fff199;
+    }
+
+    .action-row {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
     }
 
     #results {
@@ -115,7 +108,7 @@
       margin-bottom: 8px;
       cursor: pointer;
       background: #f9f9f9;
-      color: #004080;
+      color: #2943B4;
       border-radius: 4px;
     }
 
@@ -124,7 +117,7 @@
     }
 
     .error {
-      color: #cc0000;
+      color: #ffcccc;
       font-weight: bold;
       text-align: center;
     }
@@ -132,7 +125,7 @@
     .gold-divider {
       border: 0;
       height: 2px;
-      background: linear-gradient(to right, transparent, #bfa14b, transparent);
+      background: linear-gradient(to right, transparent, #ffe680, transparent);
       margin: 20px auto;
       max-width: 800px;
     }
@@ -145,12 +138,13 @@
     }
 
     iframe.fp-iframe {
-      border: 2px solid #bfa14b;
+      border: 2px solid #ffe680;
       box-shadow: 0 0 12px rgba(0,0,0,0.3);
       border-radius: 8px;
       width: 100%;
       height: 600px;
       display: block;
+      background: #000;
     }
 
     footer {
@@ -158,6 +152,8 @@
       padding: 12px;
       font-size: 14px;
       margin-top: 30px;
+      background: rgba(0,0,0,0.2);
+      color: #ffe680;
     }
 
     @media (max-width: 600px) {
@@ -170,15 +166,19 @@
 <body>
   <div class="header">
     <img src="images/logo.png" alt="77 Series Association Logo" class="logo">
-    <h1>77 SERIES ASSOCIATION</h1>
-    <span>Bound by Friendship</span>
+    <h1>MEMBERS' DIRECTORY 2025</h1>
+    <h2>77 SERIES ASSOCIATION</h2>
+    <h3>Engineering College, Rajshahi</h3>
   </div>
 
   <div class="bar">
-    <input id="searchBox" type="text" placeholder="Enter Roll or Nickname">
-    <button onclick="doSearch()">Search</button>
-    <button onclick="refreshFlipbook()" title="Reload Flipbook">Refresh</button>
-    <button onclick="toggleTheme()" title="Switch Theme">Switch Theme</button>
+    <div class="search-row">
+      <input id="searchBox" type="text" placeholder="Enter Roll or Nickname">
+      <button onclick="doSearch()">Search</button>
+    </div>
+    <div class="action-row">
+      <button onclick="refreshFlipbook()" title="Reload Flipbook">Refresh</button>
+    </div>
   </div>
   <div id="results"></div>
 
@@ -189,12 +189,12 @@
   </div>
 
   <footer>
-    <p>© 2025 77 Series Association – Engineering College, Rajshahi<br>
-    <em>Heaven’s Light Is Our Guide</em></p>
+    <p>©2025 77 Series Association, ECR<br>
+    Bound by Friendship</p>
   </footer>
 
   <script>
-    const FLIPBOOK_ID = "26231c7492";
+    const FLIPBOOK_ID = "593070ebd3";
     const BASE_URL = `https://heyzine.com/flip-book/${FLIPBOOK_ID}.html`;
 
     document.querySelector("iframe.fp-iframe").src = `${BASE_URL}#page/1`;
@@ -245,24 +245,6 @@
       document.querySelector('.embed-wrap').scrollIntoView({ behavior: 'smooth' });
       document.getElementById('results').innerHTML = '';
     }
-
-    function toggleTheme() {
-      const body = document.body;
-      if (body.classList.contains('dark-theme')) {
-        body.classList.remove('dark-theme');
-        body.classList.add('light-theme');
-        localStorage.setItem('theme', 'light');
-      } else {
-        body.classList.remove('light-theme');
-        body.classList.add('dark-theme');
-        localStorage.setItem('theme', 'dark');
-      }
-    }
-
-    window.onload = () => {
-      const savedTheme = localStorage.getItem('theme') || 'dark';
-      document.body.classList.add(savedTheme + '-theme');
-    };
   </script>
 </body>
 </html>
