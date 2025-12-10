@@ -35,48 +35,50 @@
       filter: none;
     }
 
-    body.dark-theme .header h1 { color: #ffe680; }
-    body.light-theme .header h1 { color: #004080; }
-
-    body.dark-theme .header span { color: #bfa14b; }
-    body.light-theme .header span { color: #bfa14b; }
-
     body.dark-theme footer { background: rgba(0,0,0,0.8); color: #fff; }
     body.light-theme footer { background: #f0f0f0; color: #004080; }
 
     .header {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
+      text-align: center;
       padding: 20px 10px 10px;
-      flex-wrap: wrap;
     }
 
     .logo {
       max-width: 120px;
       height: auto;
       border-radius: 12px;
+      margin-bottom: 10px;
     }
 
     .header h1 {
       font-size: 22px;
-      margin: 0;
+      margin: 4px 0;
       letter-spacing: 1px;
     }
 
-    .header span {
-      font-size: 14px;
+    .header h2 {
+      font-size: 18px;
+      margin: 4px 0;
+    }
+
+    .header h3 {
+      font-size: 16px;
+      margin: 4px 0;
       font-weight: 500;
-      display: block;
-      margin-top: 4px;
-      text-align: center;
-      width: 100%;
     }
 
     .bar {
       text-align: center;
       margin: 20px 0;
+    }
+
+    .search-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
     }
 
     #searchBox {
@@ -94,13 +96,19 @@
       color: #fff;
       border: none;
       padding: 10px 16px;
-      margin-left: 8px;
       cursor: pointer;
       border-radius: 4px;
     }
 
     button:hover {
       background: #d4b060;
+    }
+
+    .action-row {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
     }
 
     #results {
@@ -144,6 +152,9 @@
       padding: 0 10px;
     }
 
+    body.dark-theme iframe.fp-iframe { background: #000; }
+    body.light-theme iframe.fp-iframe { background: #fff; }
+
     iframe.fp-iframe {
       border: 2px solid #bfa14b;
       box-shadow: 0 0 12px rgba(0,0,0,0.3);
@@ -170,15 +181,20 @@
 <body>
   <div class="header">
     <img src="images/logo.png" alt="77 Series Association Logo" class="logo">
-    <h1>MEMBERS' DIRECTORY</h1>
-    <span>77 Series Association, ECR</span>
+    <h1>MEMBERS' DIRECTORY 2025</h1>
+    <h2>77 SERIES ASSOCIATION</h2>
+    <h3>Engineering College, Rajshahi</h3>
   </div>
 
   <div class="bar">
-    <input id="searchBox" type="text" placeholder="Enter Roll or Nickname">
-    <button onclick="doSearch()">Search</button>
-    <button onclick="refreshFlipbook()" title="Reload Flipbook">Refresh</button>
-    <button onclick="toggleTheme()" title="Switch Theme">Switch Theme</button>
+    <div class="search-row">
+      <input id="searchBox" type="text" placeholder="Enter Roll or Nickname">
+      <button onclick="doSearch()">Search</button>
+    </div>
+    <div class="action-row">
+      <button onclick="refreshFlipbook()" title="Reload Flipbook">Refresh</button>
+      <button onclick="toggleTheme()" title="Switch Theme">Switch Theme</button>
+    </div>
   </div>
   <div id="results"></div>
 
@@ -189,12 +205,12 @@
   </div>
 
   <footer>
-    <p>© 2025 77 Series Association<br>
-    <em>Engineering College, Rajshahi</em></p>
+    <p>©2025 77 Series Association, ECR<br>
+    Bound by Friendship</p>
   </footer>
 
   <script>
-    const FLIPBOOK_ID = "593070edb3";
+    const FLIPBOOK_ID = "593070ebd3"; // updated ID
     const BASE_URL = `https://heyzine.com/flip-book/${FLIPBOOK_ID}.html`;
 
     document.querySelector("iframe.fp-iframe").src = `${BASE_URL}#page/1`;
@@ -265,6 +281,4 @@
     };
   </script>
 </body>
-
 </html>
-
