@@ -307,7 +307,10 @@ menu:hover {
       });
     }
 
-    function messages() {iframe.src = `${FULL_EMBED_URL}#page/3`;}
+    function messages() {iframe.src = `${FULL_EMBED_URL}#page/3`;
+document.querySelector('.embed-wrap').scrollIntoView({ behavior: 'smooth' });
+
+}
      function departed() {iframe.src = `${FULL_EMBED_URL}#page/7`;}
 
    function members() {iframe.src = `${FULL_EMBED_URL}#page/12`;}
