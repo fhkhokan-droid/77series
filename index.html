@@ -163,8 +163,8 @@ menu:hover {
     }
 
     .embed-wrap {
-      width: 80%;
-      max-width: 1200px;
+      width: 90%;
+      max-width: 1000px;
       margin: 20px auto;
       padding: 0 10px;
     }
@@ -174,7 +174,7 @@ menu:hover {
       box-shadow: 0 0 12px rgba(0,0,0,0.3);
       border-radius: 8px;
       width: 100%;
-      height: 600px;
+      height: 580px;
       display: block;
       background: #000;
     }
@@ -233,7 +233,6 @@ menu:hover {
   <div class="embed-wrap">
 <div class="action-row">
       <menu onclick="messages()" title="Messages">Messages</menu>
-<menu onclick="departed()" title="Reload Flipbook">Departed</menu>
  <menu onclick="members()" title="Members">Members</menu>
    <menu onclick="committees()" title="Album">Committees</menu>
 <menu onclick="constitution()" title="Reload Flipbook">Constitution</menu>
@@ -243,7 +242,9 @@ menu:hover {
 </div>
 
 <div class="action-row">
-      <menu onclick="events()" title="Messages">Events</menu>
+      <menu onclick="events()" title="Events">Events</menu>
+<menu onclick="departed()" title="Reload Flipbook">Departed</menu>
+
 <menu onclick="album()" title="Album">Album</menu>
  
 
@@ -306,7 +307,7 @@ menu:hover {
       });
     }
 
-    function messages() {iframe.src = `${FULL_EMBED_URL}#page/2`;}
+    function messages() {iframe.src = `${FULL_EMBED_URL}#page/3`;}
      function departed() {iframe.src = `${FULL_EMBED_URL}#page/7`;}
 
    function members() {iframe.src = `${FULL_EMBED_URL}#page/12`;}
@@ -315,7 +316,7 @@ function committees() {iframe.src = `${FULL_EMBED_URL}#page/100`;}
  function events() {iframe.src = `${FULL_EMBED_URL}#page/104`;}
 
 
-     function album() {iframe.src = `${FULL_EMBED_URL}#page/124`;}
+     function album() {iframe.src = `${FULL_EMBED_URL}#page/125`;}
   
    function constitution() {iframe.src = `${FULL_EMBED_URL}#page/112`;}
     
