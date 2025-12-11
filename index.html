@@ -24,7 +24,7 @@
       align-items: center;
       justify-content: center;
       gap: 12px;
-      padding: 20px 10px 10px;
+      padding: 10px 10px 10px;
       flex-wrap: wrap;
       text-align: left;
     }
@@ -36,7 +36,7 @@
     }
 
     .logo {
-      max-width: 120px;
+      max-width: 140px;
       height: auto;
       border-radius: 12px;
     }
@@ -63,24 +63,24 @@
 
     .bar {
       text-align: center;
-      margin: 20px 0;
+      margin: 6px 0;
     }
 
     .search-row {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
-      margin-bottom: 12px;
+      margin-bottom: 6px;
     }
 
     #searchBox {
       padding: 10px;
       border: 1px solid #ffe680;
       border-radius: 4px;
-      width: 60%;
-      max-width: 320px;
+      width: 50%;
+      max-width: 180px;
       background: #fff;
       color: #2943B4;
     }
@@ -94,10 +94,32 @@
       border-radius: 4px;
       font-weight: bold;
     }
+ menu{
+      background: #2943B4;
+      color: #2943B4;
+      border: none;
+      padding: 0px 4px;
+      cursor: pointer;
+      border-radius: 0px;
+      font-weight:bold;
+font-size: 12px;
+      margin: 4px 0;
+      color: #fff;
+
+
+    }
+
+menu:hover {
+    
+      color: #ffe680;
+
+
+    }
 
     button:hover {
       background: #fff199;
     }
+
 
     .action-row {
       display: flex;
@@ -114,7 +136,7 @@
 
     .result {
       border: 1px solid #ccc;
-      padding: 8px;
+      padding: 6px;
       margin-bottom: 8px;
       cursor: pointer;
       background: #f9f9f9;
@@ -136,12 +158,12 @@
       border: 0;
       height: 2px;
       background: linear-gradient(to right, transparent, #ffe680, transparent);
-      margin: 20px auto;
+      margin: 12px auto;
       max-width: 800px;
     }
 
     .embed-wrap {
-      width: 100%;
+      width: 80%;
       max-width: 1200px;
       margin: 20px auto;
       padding: 0 10px;
@@ -161,7 +183,7 @@
       text-align: center;
       padding: 12px;
       font-size: 14px;
-      margin-top: 30px;
+      margin-top: 10px;
       background: rgba(0,0,0,0.2);
       color: #ffe680;
     }
@@ -177,17 +199,17 @@
         max-width: 80px;
       }
 
-      .header h1 { font-size: 16px; }
-      .header h2 { font-size: 14px; }
-      .header h3 { font-size: 13px; }
-      iframe.fp-iframe { height: 420px; }
+      .header h1 { font-size: 20px; }
+      .header h2 { font-size: 16px; }
+      .header h3 { font-size: 14px; }
+      iframe.fp-iframe { height: 600px; }
     }
   </style>
 </head>
 <body>
   <div class="header">
     <img src="images/logo.png" alt="77 Series Association Logo" class="logo">
-    <div class="header-text">
+    <div class="header-text"><br>
       <h1>MEMBERS' DIRECTORY</h1>
       <h2>77 SERIES ASSOCIATION</h2>
       <h3>Engineering College, Rajshahi</h3>
@@ -197,19 +219,42 @@
   <div class="bar">
     <div class="search-row">
       <input id="searchBox" type="text" placeholder="Enter Roll or Nickname">
-      <button onclick="doSearch()">Search</button>
+      
+<button onclick="doSearch()">Search</button>
+<button onclick="refreshFlipbook()" title="Reload Flipbook">Refresh</button>
+
     </div>
-    <div class="action-row">
-      <button onclick="refreshFlipbook()" title="Reload Flipbook">Refresh</button>
-    </div>
+    
   </div>
   <div id="results"></div>
 
-  <hr class="gold-divider">
+ 
 
   <div class="embed-wrap">
+<div class="action-row">
+      <menu onclick="messages()" title="Messages">Messages</menu>
+<menu onclick="departed()" title="Reload Flipbook">Departed</menu>
+ <menu onclick="members()" title="Members">Members</menu>
+   <menu onclick="committees()" title="Album">Committees</menu>
+<menu onclick="constitution()" title="Reload Flipbook">Constitution</menu>
+
+
+
+</div>
+
+<div class="action-row">
+      <menu onclick="events()" title="Messages">Events</menu>
+<menu onclick="album()" title="Album">Album</menu>
+ 
+
+
+
+</div>
+<hr class="gold-divider">
+
     <iframe src="" class="fp-iframe" allowfullscreen></iframe>
   </div>
+</div>
 
   <footer>
     <p>©2025 77 Series Association, ECR<br>
@@ -261,11 +306,26 @@
       });
     }
 
-    function refreshFlipbook() {
+    function messages() {iframe.src = `${FULL_EMBED_URL}#page/2`;}
+     function departed() {iframe.src = `${FULL_EMBED_URL}#page/7`;}
+
+   function members() {iframe.src = `${FULL_EMBED_URL}#page/12`;}
+function committees() {iframe.src = `${FULL_EMBED_URL}#page/100`;}
+  
+ function events() {iframe.src = `${FULL_EMBED_URL}#page/104`;}
+
+
+     function album() {iframe.src = `${FULL_EMBED_URL}#page/124`;}
+  
+   function constitution() {iframe.src = `${FULL_EMBED_URL}#page/112`;}
+    
+    
+ function refreshFlipbook() {
       iframe.src = `${FULL_EMBED_URL}#page/1`;
       document.querySelector('.embed-wrap').scrollIntoView({ behavior: 'smooth' });
       document.getElementById('results').innerHTML = '';
     }
+
   </script>
 </body>
 </html>
