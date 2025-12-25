@@ -140,7 +140,7 @@
     }
 
     iframe.fp-iframe {
-      border: 2px solid #ffe680;
+      border: 1px solid #ffe680;
       box-shadow: 0 0 12px rgba(0,0,0,0.3);
       border-radius: 8px;
       width: 100%;
@@ -193,18 +193,21 @@
  <menu onclick="members()" title="Members">Members</menu>
    
 
-<menu onclick="departed()" title="Departed Souls">Departed</menu>
+<menu onclick="committees()" title="Committees">Committees</menu>
 <menu onclick="album()" title="Album">Album</menu>
-
-
 </div>
 
 <div class="action-row">
      
- <menu onclick="committees()" title="Committees">Committees</menu>
+<menu onclick="departed()" title="Departed Souls">Departed</menu>
+
+ 
  <menu onclick="events()" title="Events">Events</menu>
+<menu onclick="Memory()" title="Memory">Memory</menu>
+
 
 <menu onclick="constitution()" title="Constitution">Constitution</menu>
+
 
 
 
@@ -224,7 +227,7 @@
   </footer>
 
   <script>
-    const FULL_EMBED_URL = "https://heyzine.com/flip-book/593070edb3.html";
+    const FULL_EMBED_URL = "https://heyzine.com/flip-book/0aa952a1a6.html";
 
     const iframe = document.querySelector("iframe.fp-iframe");
     iframe.src = `${FULL_EMBED_URL}#page/1`;
@@ -299,6 +302,11 @@ document.querySelector('.embed-wrap').scrollIntoView({ behavior: 'smooth' });
 
 }
 
+function Memory() {iframe.src = `${FULL_EMBED_URL}#page/144`;
+document.querySelector('.embed-wrap').scrollIntoView({ behavior: 'smooth' });
+ document.getElementById('results').innerHTML = '';
+
+}
 
 
      function album() {iframe.src = `${FULL_EMBED_URL}#page/125`;
